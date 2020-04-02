@@ -1,0 +1,15 @@
+<div class="form-group">
+                
+                <label asp-for="ingredient.Type" class="control-label"></label>
+                <input asp-for="ingredient.Type" class="form-control" rows="5" />
+                <span asp-validation-for="ingredient.Type" class="text-danger"></span>
+
+                <label asp-for="ingredient.Quantity" class="control-label"></label>
+                <input asp-for="ingredient.Quantity" class="form-control" rows="5" />
+                <span asp-validation-for="ingredient.Quantity" class="text-danger"></span>
+
+                <label asp-for="ingredient.Unit" class="control-label"></label>
+                <input asp-for="ingredient.Unit" class="form-control" rows="5" />
+                <span asp-validation-for="ingredient.Unit" class="text-danger"></span>
+
+            </div>

@@ -1,0 +1,19 @@
+﻿@model PagedListViewModelBase
+
+@if (Model.PageNumber > 1)
+{
+    <a asp-action="Index" asp-route-pageNumber="@(Model.PageNumber - 1)" class="btn btn-teal">&lt;</a>
+}
+else
+{
+    <a class="btn">&lt;</a>
+}
+
+@if (Model.PageNumber < Model.PageCount)
+{
+    <a asp--action="Ïndex" asp-route-pageNumber="@(Model.PageNumber + 1)" class="btn btn-teal">&gt;</a>
+}
+else
+{
+    <a class="btn">&gt;</a>
+}

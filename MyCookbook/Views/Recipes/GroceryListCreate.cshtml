@@ -1,0 +1,29 @@
+﻿@model MyCookbook.Models.RecipeCreateViewModel
+
+<h4>Create Your Grocerylist</h4>
+<i>No need to think long and hard about your grocerylist...<br /> Just select the recipes you are going to cook and click 'Create Grocerylist' to have your grocerylist created in an instance! </i>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="GroceryListCreate">
+            <h5>Recipes</h5>
+            @for (int i = 0; i < Model.Recipes.Count; i++)
+            {
+                <div class="recipes">
+                    <input type="hidden" asp-for="Recipes[i].Value" />
+                    <label asp-for="Recipes[i].Text">@Model.Recipes[i].Text</label>
+                    <input type="checkbox" asp-for="Recipes[i].Selected" />
+                </div>
+            }
+
+            <div class="form-group">
+                <br /><input type="submit" value="Create Grocerylist" class="btn btn-primary" formaction=@Url.Action("GroceryListDetails") formmethod="post" />
+            </div>
+        </form>
+    </div>
+</div>
+<link href="~/css/RecipeColumns.css" rel="stylesheet" />
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

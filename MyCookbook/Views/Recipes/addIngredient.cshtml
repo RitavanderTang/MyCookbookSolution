@@ -1,0 +1,33 @@
+﻿@model MyCookbook.Models.IngredientCreateViewModel
+
+
+<h4>Add Ingredients</h4>
+<hr />
+<div class="row">
+    <div class="col-md-10">
+        <form asp-action="addIngredient">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="col-md-5" style="float:left;padding-left:0px;">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" style="width: 200px;" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="col-md-2" style="float:left;padding-left:0px;">
+                <label asp-for="Quantity" class="control-label"></label>
+                <input asp-for="Quantity" class="form-control" style="width: 100px;" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+            <div class="col-md-3" style="float:left;padding-left:0px;">
+                <label asp-for="Unit" class="control-label"></label>
+                <select asp-for="Unit" class="form-control" asp-items="Model.Units" style="width: 200px;"></select>
+            </div><br />
+
+
+            <br /><div class="form-group; col-md-3" style="padding-left: 0px;">
+                <br /><input type="submit" name="ingredientInput" value="Add Ingredient" formaction=@Url.Action("addIngredient") formmethod="post" /><br />
+                <br /><input type="submit" value="Finish" class="btn btn-primary" formaction=@Url.Action("Create") formmethod="post" />
+            </div>
+        </form>
+    </div>
+</div>
+

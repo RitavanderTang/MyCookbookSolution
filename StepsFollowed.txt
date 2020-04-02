@@ -1,0 +1,282 @@
+Step 1:
+
+Create classes with properties of the objects you want to create and manipulate in the app (Recipes, Ingredients, RecipeIngredient).
+
+**************************************************************************************************************************************************
+**************************************************************************************************************************************************
+Step 2:
+
+Define the relations between the classes in the OnModelCreating (ApplicationDbContet)
+
+   protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<Recipe>()
+                .Property(r => r.Title)
+                .IsRequired()
+                .HasMaxLength(150);
+
+            builder.Entity<RecipeIngredient>()
+                .HasOne(ri => ri.Recipe)
+                .WithMany(r => r.RecipeIngredients)
+                .HasForeignKey(ri => ri.RecipeId);
+
+            builder.Entity<RecipeIngredient>()
+                .HasKey(ri => new { ri.RecipeId, ri.IngredientId }); // Key is unieke combinatie van RecipeId en IngredientId
+
+            builder.Entity<RecipeIngredient>()
+                .HasOne(ri => ri.Ingredient)
+                .WithMany(i => i.IngredientRecipes)
+                .HasForeignKey(ri => ri.IngredientId);
+            
+            base.OnModelCreating(builder);
+
+            Seed(builder);
+        }
+
+**************************************************************************************************************************************************
+**************************************************************************************************************************************************
+
+Step 3:
+
+Fill (seed) the database with some data to test in the ApplicationDbContext
+
+ private static void Seed(ModelBuilder builder)
+        {
+            var cheese = new Ingredient() { Id = 1, Type = "Cheese", Unit = "Grams", Quantity = 100 };
+            var milk = new Ingredient() { Id = 2, Type = "Milk", Unit = "Mililiter", Quantity = 500 };
+            var pumpkin = new Ingredient() { Id = 3, Type = "Pumpkin", Unit = "Piece", Quantity = 1 };
+            var sugar = new Ingredient() { Id = 4, Type = "Sugar", Unit = "Grams", Quantity = 20 };
+            var beans = new Ingredient() { Id = 5, Type = "Beans", Unit = "Grams", Quantity = 150 };
+
+            var pastaCarbonara = new Recipe() { Id = 1, Title = "Pasta Carbonara", Instructions = "Make pasta Carbonara..." };
+            var pancakes = new Recipe() { Id = 2, Title = "Pancakes", Instructions = "Make pancakes..." };
+            var salad = new Recipe() { Id = 3, Title = "Salad", Instructions = "Make salad..." };
+            var pumpkinSoup = new Recipe() { Id = 4, Title = "Pumkinsoup", Instructions = "Make pumkinsoup..." };
+            var pizza = new Recipe() { Id = 5, Title = "Pizza", Instructions = "Make pizza..." };
+
+            var saladBeans = new RecipeIngredient() { RecipeId = salad.Id, IngredientId = beans.Id };
+            var saladPumpkin = new RecipeIngredient() { RecipeId = salad.Id, IngredientId = pumpkin.Id };
+            var sugarPancakes = new RecipeIngredient() { IngredientId = sugar.Id, RecipeId = pancakes.Id };
+            var milkPancakes = new RecipeIngredient() { IngredientId = milk.Id, RecipeId = pancakes.Id };
+
+            builder.Entity<Ingredient>().HasData(cheese, milk, pumpkin, sugar, beans);
+            builder.Entity<Recipe>().HasData(pastaCarbonara, pancakes, salad, pumpkinSoup, pizza);
+            builder.Entity<RecipeIngredient>().HasData(saladBeans, saladPumpkin, sugarPancakes, milkPancakes);
+
+        }
+
+**************************************************************************************************************************************************
+**************************************************************************************************************************************************
+
+Step 4:
+
+add-migration MigrationName
+update-database
+In Package Manager Console
+
+Check whether databases have been created correctly
+
+**************************************************************************************************************************************************
+**************************************************************************************************************************************************
+
+Step 5:
+
+Create a Recipescontroller
+Create a RecipeListViewModel class, this class determines what will be displayed in the app
+Create a PagedViewModel to determine the number of items displayed on a page. Add the RecipeListViewModel to the PagedViewModel and edit The Index method.
+Return the RecipesListViewModel in the View()
+
+public async Task<IActionResult> Index(int? pageNumber)
+        {
+            var vm = new PagedViewModel<RecipeListViewModel>();
+
+            if (pageNumber.HasValue)
+            {
+                vm.PageNumber = pageNumber.Value;
+            }
+            vm.Items = await _context.Recipes
+                .Skip((vm.PageNumber -1) * vm.PageSize)
+                .Take(vm.PageSize)
+                .Select(
+                r => new RecipeListViewModel
+                {
+                    Id = r.Id,
+                    Title = r.Title,
+                    Instructions = r.Instructions }).ToListAsync();
+            vm.ItemCount = await _context.Recipes.CountAsync();
+            return View(vm);
+        }
+
+**************************************************************************************************************************************************
+**************************************************************************************************************************************************
+
+Step 6:
+
+Edit the Index View, add the RecipeListViewModel as the Model 
+At the bottom of the page, add a _partial View, for the navigation buttons on the app pages
+
+@model PagedViewModel<RecipeListViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Item.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Item.Instructions)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Item.Ingredients)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Instructions)
+            </td>
+            <td>
+                @Html.DisplayFor(modeItem => item.Ingredients)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+@{ 
+    await Html.RenderPartialAsync("_PagerPartial", Model);
+}
+
+**************************************************************************************************************************************************
+**************************************************************************************************************************************************
+
+Step 7:
+
+Add Ingredients to the Details page per Recipe. 
+
+Create RecipeDetailsViewModel
+Edit the Details() method in de RecipesController:
+
+public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var vm = await _context.Recipes.Select(r => new RecipeDetailsViewModel
+            {
+                Id = r.Id,
+                Title = r.Title,
+                Instructions = r.Instructions,
+                Ingredients = _context.Ingredients
+                .Where(i => i.IngredientRecipes.Select(ir => ir.RecipeId).Contains(r.Id))
+                .Select(i => i.Type).ToList()
+            }).FirstOrDefaultAsync(m => m.Id == id);
+
+            if (vm == null)
+            {
+                return NotFound();
+            }
+
+            return View(vm);
+        }
+
+Edit the Details View Page:
+
+@model MyCookbook.Models.RecipeDetailsViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Recipe</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Instructions)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Instructions)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Ingredients)
+        </dt>
+        <dd class="col-sm-10">
+            <ul>
+                @foreach (var ingredient in Model.Ingredients)
+                {
+                    <li>@ingredient</li>
+                }
+            </ul>
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+
+**************************************************************************************************************************************************
+**************************************************************************************************************************************************
+
+Step 8:
+
+Edit the Create() method, so that ingredients can be added to a recipe. 
+
+      public async Task<IActionResult> Create(RecipeCreateViewModel recipeViewModel)
+        { 
+            if (ModelState.IsValid)
+            {
+                var recipe = new Recipe()
+                {
+                    Id = recipeViewModel.Id,
+                    Title = recipeViewModel.Title,
+                    Instructions = recipeViewModel.Instructions,
+                    
+                    
+                };
+                var ingredientId = recipeViewModel.Ingredients;
+                recipe.RecipeIngredients.Add(new RecipeIngredient
+                {
+                    Recipe = recipe,
+                    Ingredient = _context.Ingredients.FirstOrDefault(i => i.Id == ingredientId )
+                });
+
+                _context.Add(recipe);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            
+            return View(recipeViewModel);
+        }
+

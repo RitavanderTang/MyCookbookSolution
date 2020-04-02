@@ -1,0 +1,43 @@
+﻿@model PagedViewModel<RecipeListViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="cookbookHeader">
+    <h2>My Cookbook</h2>
+</div><br />
+
+
+<p>
+    <a asp-action="Create">Create A Delicious New Recipe</a>
+    <br /><a asp-action="GroceryListCreate">Create A Grocery List</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Item.Title)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.Id">View Full Recipe</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit Recipe</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete Recipe</a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+<link href="~/css/cookbookHeader.css" rel="stylesheet" />
+@{ 
+    await Html.RenderPartialAsync("_PagerPartial", Model);
+}

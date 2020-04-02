@@ -1,0 +1,10 @@
+﻿ul li {
+    display: inline-block;
+
+}
+
+li {
+    width: 33%;
+    float: left;
+    list-style: none;
+}

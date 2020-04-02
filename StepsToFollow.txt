@@ -1,0 +1,52 @@
+Per Ingredient kan je op 'add' klikken
+
+	Buttonclick heeft als functie dat 1 Ingredient wordt gecreeerd met Id, ingevoerde type, hoeveelheid en unit
+		EN dat ingredient wordt toegevoegd aan het recipe
+
+
+Met create wordt recipe toegevoegd aan database en Index. 
+
+
+        public int createRecipe(RecipeCreateViewModel recipeViewModel)
+        {
+            // Elke keer als je op de knop drukt om titel en instructies toe te voegen, gebeurd het volgende:
+            // En dan verschijnen de invoervelden voor de ingredienten
+            var recipe = new Recipe()
+            {
+                Id = recipeViewModel.Id,
+                Title = recipeViewModel.Title,
+                Instructions = recipeViewModel.Instructions
+            };
+            _context.Recipes.Add(recipe); //Deze regel hier of pas aan het einde, als de ingredienten in het recept zijn gestopt?
+            return recipe.Id;
+
+            // Met Javascript de teruggeven Id opvangen, dan recipe met dit Id ophalen uit database
+
+        }
+        // Met Javascript recipeId meegeven aan onderstaande methode
+        public void createIngredient(RecipeCreateViewModel recipeViewModel, int recipeId)
+        {
+            // Elke keer dat een ingredient wordt toegevoegd aan een recipe, volgende code uitvoeren:
+            var ingredient = new Ingredient()
+            {
+                Id = recipeViewModel.ingredient.Id,
+                Type = recipeViewModel.ingredient.Type,
+                Quantity = recipeViewModel.ingredient.Quantity,
+                Unit = recipeViewModel.ingredient.Unit
+            };
+
+            _context.Ingredients.Add(ingredient);
+
+            var newRecipeIngredient = new RecipeIngredient();
+            newRecipeIngredient.RecipeId = recipeId;
+            newRecipeIngredient.IngredientId = ingredient.Id;
+
+            _context.RecipeIngredients.Add(newRecipeIngredient);
+
+            // Deze methode moet dus worden aangeroepen met de knop waarmee je 1 ingredient toevoegd aan het recipe
+            // <input type="button" value="CreateIngredient" onclick="location.href='@Url.Action("createIngredient", "RecipeController")'" />
+            // https://stackoverflow.com/questions/2503923/html-button-calling-an-mvc-controller-and-action-method   
+        }
+
+
+        @ViewBag.ingredientType @ViewBag.ingredientQuantity @ViewBag.ingredientUnit

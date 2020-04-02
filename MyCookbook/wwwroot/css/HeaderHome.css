@@ -1,0 +1,15 @@
+﻿.text-center {
+    padding: 60px;
+    text-align: center;
+    background: #20c997;
+    color: white;
+    font-size: 30px;
+}
+
+    .text-center i {
+        padding: 10px;
+        text-align: center;
+        background: #20c997;
+        color: white;
+        font-size: 20px;
+    }

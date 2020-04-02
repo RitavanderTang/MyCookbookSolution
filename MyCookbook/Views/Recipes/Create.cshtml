@@ -1,0 +1,39 @@
+﻿@model RecipeCreateViewModel
+@{
+    ViewData["Title"] = "Create";
+}
+
+
+<div class="cookbookHeader">
+    <h4>Create New Recipe</h4>
+</div>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" style="width: 400px;" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+
+                <label asp-for="Instructions" class="control-label"></label>
+                <textarea asp-for="Instructions" class="form-control" cols="40" rows="5"></textarea>
+                <span asp-validation-for="Instructions" class="text-danger"></span><br />
+
+                <input type="submit" name="recipeInput" value="Add Recipe" formaction=@Url.Action("addRecipe") formmethod="post" />
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+<link href="~/css/cookbookHeader.css" rel="stylesheet" />
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
