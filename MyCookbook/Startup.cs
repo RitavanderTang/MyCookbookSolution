@@ -12,6 +12,8 @@ using MyCookbook.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MyCookbook.Services;
+using MyCookbook.Clients;
 
 namespace MyCookbook
 {
@@ -32,6 +34,11 @@ namespace MyCookbook
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddScoped<ISpoonService, SpoonService>();
+            services.AddHttpClient<ISpoonClient, SpoonClient>(options =>
+            {
+                options.BaseAddress = new Uri(Configuration["ClientConfig:SpoonClientAddress"]);
+            });
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
@@ -58,6 +65,11 @@ namespace MyCookbook
             app.UseAuthentication();
             app.UseAuthorization();
 
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapControllers();
+            //    endpoints.MapRazorPages();
+            //});
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
